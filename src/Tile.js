@@ -1,20 +1,26 @@
 import {useMemo} from 'preact';
 
 const styles = {
+  tileOutline: {
+    height: '1*',
+    width: '1*',
+    border: '1dip rgba(30, 30, 30, 0.5) solid',
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+  },
   tile: {
     height: '1*',
     width: '1*',
-    backgroundColor: 'rgba(100, 100, 100, 0.6)',
-    backdropFilter: 'blur(0dip)',
-    border: '1dip rgba(30, 30, 30, 0.6) solid',
+    backdropFilter: 'blur(8dip)',
+    opacity: '0',
+
   },
   primary: {
     backgroundColor: 'rgba(255, 0, 0, 0.3)',
-    backdropFilter: 'blur(8dip)',
+    opacity: '1',
   },
   secondary: {
     backgroundColor: 'rgba(0, 0, 255, 0.3)',
-    backdropFilter: 'blur(8dip)',
+    opacity: '1',
   },
 };
 
@@ -31,13 +37,16 @@ function tileStyles(state) {
 }
 
 export default function Tile({state, locked, onClick}) {
-  const style = useMemo(() => {
+  const tileStyle = useMemo(() => {
     return tileStyles(state);
   }, [state]);
   return (
-    <div
-      style={style}
-      onClick={() => !locked && onClick()}>
+    <div style={styles.tileOutline}>
+      <div
+        style={tileStyle}
+        class="transitionBg"
+        onClick={() => !locked && onClick()}>
+      </div>
     </div>
   );
 }
