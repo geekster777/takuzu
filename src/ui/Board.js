@@ -1,4 +1,4 @@
-import {useState, useMemo} from 'preact';
+import {useState, useEffect, useMemo} from 'preact';
 import Tile from 'tile';
 import {isValid} from 'validation';
 import { TILE_STATE } from './validation';
@@ -11,13 +11,18 @@ const BOARD = [
 ];
 
 const styles = {
-  board: {
+  content: {
     backgroundImage: 'url(assets/castle.jpg)',
     backgroundSize: 'cover',
     backgroundPosition: 'center center',
     flow: 'vertical',
     width: '*',
     height: '*',
+  },
+  board: {
+    flow: 'vertical',
+    height: '*',
+    width: '*',
     padding: '8dip',
     borderSpacing: '16dip',
   },
@@ -25,6 +30,9 @@ const styles = {
     height: '1*',
     flow: 'horizontal',
     borderSpacing: '16dip',
+  },
+  button: {
+    margin: '8dip *',
   }
 }
 
@@ -42,29 +50,44 @@ function nextTileState(state) {
 
 export default function Board() {
   const [board, setBoard] = useState(BOARD);
+  const [showInvalidTiles, setShowInvalidTiles] = useState(false);
 
-  const {invalidTiles} = useMemo(() => {
-    return isValid(board);
+  useEffect(() => {
+    setShowInvalidTiles(false);
   }, [board]);
 
-  return <div style={styles.board}>
-    {board.map((row, i) => {
-      return <div style={styles.row}> {
-        row.map((tileState, j) => {
-          const toggleTile = () => {
-            const newState = nextTileState(tileState);
-            const newBoard = board.map(row => row.slice());
-            newBoard[i][j] = newState;
-            setBoard(newBoard);
-          };
 
-          return <Tile state={tileState}
-            onClick={toggleTile}
-            locked={BOARD[i][j] !== TILE_STATE.UNSELECTED}
-            invalid={invalidTiles.indexOf(`${i},${j}`) !== -1}
-            />;
-        })
-      }</div>;
-    })}
+  const {invalidTiles} = useMemo(() => {
+    if (!showInvalidTiles) {
+      return {invalidTiles: []};
+    }
+
+    return isValid(board);
+  }, [board, showInvalidTiles]);
+
+  return <div style={styles.content}>
+    <div>
+      <button style={styles.button} onClick={() => setShowInvalidTiles(true)}>Check Solution</button>
+    </div>
+    <div style={styles.board}>
+      {board.map((row, i) => {
+        return <div style={styles.row}> {
+          row.map((tileState, j) => {
+            const toggleTile = () => {
+              const newState = nextTileState(tileState);
+              const newBoard = board.map(row => row.slice());
+              newBoard[i][j] = newState;
+              setBoard(newBoard);
+            };
+
+            return <Tile state={tileState}
+              onClick={toggleTile}
+              locked={BOARD[i][j] !== TILE_STATE.UNSELECTED}
+              invalid={invalidTiles.indexOf(`${i},${j}`) !== -1}
+              />;
+          })
+        }</div>;
+      })}
+    </div>
   </div>;
 }

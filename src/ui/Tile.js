@@ -3,26 +3,30 @@ import { TILE_STATE } from './validation';
 
 const styles = {
   tileOutline: {
-    height: '1*',
-    width: '1*',
+    height: '*',
+    width: '*',
+    transition: 'outline linear 150ms',
+    outline: '0 rgba(255, 0, 0, 1) solid',
     border: '1dip rgba(30, 30, 30, 0.5) solid',
     backgroundColor: 'rgba(255, 255, 255, 0.25)',
   },
   invalid: {
-    outline: '2dip rgba(255, 0, 0, 1) solid',
+    outlineWidth: '2dip',
   },
   tile: {
-    height: '1*',
-    width: '1*',
+    height: '*',
+    width: '*',
     backdropFilter: 'blur(8dip)',
     opacity: '0',
 
   },
   primary: {
+    boxShadow: '0 0 4dip rgba(0, 0, 0, 0.5)',
     backgroundColor: 'rgba(255, 0, 0, 0.3)',
     opacity: '1',
   },
   secondary: {
+    boxShadow: '0 0 4dip rgba(0, 0, 0, 0.5)',
     backgroundColor: 'rgba(0, 0, 255, 0.3)',
     opacity: '1',
   },

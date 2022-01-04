@@ -17,7 +17,22 @@
 </script>
 <style>
   .transitionBg {
-    transition: opacity linear 150ms, background-color linear 150ms;
+    transition: opacity linear 150ms, background-color linear 150ms, box-shadow linear 150ms;
+  }
+  
+  button {
+    style-set: std-button-base;
+    padding: 8dip 16dip;
+    background-color: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(8dip);
+    border-radius: 2dip;
+    box-shadow: 0 0 2dip rgba(0, 0, 0, 0.5);
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+  button:hover {
+    background-color: rgba(255, 255, 255, 0.7);
+    box-shadow: 0 0 4dip rgba(0, 0, 0, 0.5);
   }
 </style>
 </head>
