@@ -1,7 +1,7 @@
 import {useState, useEffect, useMemo} from 'preact';
 import Tile from 'tile';
-import {isValid} from 'validation';
-import { TILE_STATE } from './validation';
+import {isValid, TILE_STATE} from 'validation';
+import Vibrant from 'vibrant';
 
 const BOARD = [
     [0, null, null, null],
@@ -48,9 +48,26 @@ function nextTileState(state) {
   return TILE_STATE.PRIMARY;
 }
 
+function rgbToHex(r, g, b) {
+  return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}
+
 export default function Board() {
   const [board, setBoard] = useState(BOARD);
   const [showInvalidTiles, setShowInvalidTiles] = useState(false);
+  const [palette, setPalette] = useState([]);
+
+  useEffect(() => {
+    new Vibrant(__DIR__ + 'assets/castle.jpg').getPalette((p) => {
+      const primary = p.Vibrant._rgb;
+      const secondary = p.Muted._rgb;
+      setPalette({
+        primary: `rgba(${primary[0]}, ${primary[1]}, ${primary[2]}, 0.5)`,
+        secondary: `rgba(${secondary[0]}, ${secondary[1]}, ${secondary[2]}, 0.5)`,
+      });
+    });
+    // TODO: Run whenever the board image changes
+  }, []);
 
   useEffect(() => {
     setShowInvalidTiles(false);
@@ -67,7 +84,9 @@ export default function Board() {
 
   return <div style={styles.content}>
     <div>
-      <button style={styles.button} onClick={() => setShowInvalidTiles(true)}>Check Solution</button>
+      <button style={styles.button} onClick={() => {
+        setShowInvalidTiles(true);
+      }}>Check Solution</button>
     </div>
     <div style={styles.board}>
       {board.map((row, i) => {
@@ -84,6 +103,7 @@ export default function Board() {
               onClick={toggleTile}
               locked={BOARD[i][j] !== TILE_STATE.UNSELECTED}
               invalid={invalidTiles.indexOf(`${i},${j}`) !== -1}
+              palette={palette}
               />;
           })
         }</div>;
