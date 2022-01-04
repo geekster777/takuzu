@@ -1,3 +1,4 @@
+@ECHO OFF
 packfolder src\ui target\assets.rc -binary
 
 IF "%1" == "prod" (
