@@ -1,7 +1,7 @@
 import {useState, useEffect, useMemo} from 'preact';
 import Tile from 'tile';
 import {isValid, TILE_STATE} from 'validation';
-import Vibrant from 'vibrant';
+import {calcVibrantColors} from 'colorUtils';
 
 const BOARD = [
     [0, null, null, null],
@@ -55,17 +55,15 @@ function rgbToHex(r, g, b) {
 export default function Board() {
   const [board, setBoard] = useState(BOARD);
   const [showInvalidTiles, setShowInvalidTiles] = useState(false);
-  const [palette, setPalette] = useState([]);
+  const [palette, setPalette] = useState({
+    primary: 'rgba(255, 255, 255, 0.5)',
+    secondary: 'rgba(0, 0, 0, 0.5)',
+  });
 
   useEffect(() => {
-    new Vibrant(__DIR__ + 'assets/castle.jpg').getPalette((p) => {
-      const primary = p.Vibrant._rgb;
-      const secondary = p.Muted._rgb;
-      setPalette({
-        primary: `rgba(${primary[0]}, ${primary[1]}, ${primary[2]}, 0.5)`,
-        secondary: `rgba(${secondary[0]}, ${secondary[1]}, ${secondary[2]}, 0.5)`,
-      });
-    });
+    const colors = Window.this.xcall('color_palette', 'assets/castle.jpg');
+    const vibrantPalette = calcVibrantColors(colors);
+    setPalette(vibrantPalette);
     // TODO: Run whenever the board image changes
   }, []);
 
