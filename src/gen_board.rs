@@ -1,3 +1,5 @@
+use rand::Rng;
+
 #[derive(PartialEq, Copy, Clone)]
 pub enum BoardState {
   EMPTY = 0,
@@ -6,20 +8,106 @@ pub enum BoardState {
 }
 
 pub struct BoardGenerator {
-  size: usize,
+  pub size: usize,
 }
 
 impl BoardGenerator {
   pub fn gen_board(&self) -> Vec<BoardState> {
     let mut board = Vec::with_capacity(self.size * self.size);
-    for i in 0..(self.size * self.size) {
-      board[i] = BoardState::EMPTY;
+    for _ in 0..(self.size * self.size) {
+      board.push(BoardState::EMPTY);
+    }
+
+    let mut rng = rand::thread_rng();
+    let mut empty_count = self.size * self.size;
+
+    loop {
+      let idx = self.nth_empty(&board, rng.gen_range(0..empty_count));
+      board[idx] = match rng.gen::<bool>() {
+        true => BoardState::PRIMARY,
+        false => BoardState::SECONDARY,
+      };
+      empty_count -= 1;
+
+      let mut solution_count = self.count_solutions(&board);
+      if solution_count == 0 {
+        // If this spot is invalid, then the inverse must be valid
+        board[idx] = match board[idx] {
+          BoardState::PRIMARY => BoardState::SECONDARY,
+          _ => BoardState::PRIMARY,
+        };
+        solution_count = self.count_solutions(&board);
+      }
+
+      if solution_count == 1 {
+        break;
+      }
     }
 
     return board;
   }
 
-  fn _try_make_board(&self, _board: &Vec<BoardState>) {}
+  fn count_solutions(&self, base_board: &Vec<BoardState>) -> usize {
+    let mut board = base_board.clone();
+    let mut solutions = 0;
+    let mut idx_stack: Vec<usize> = Vec::with_capacity(self.size * self.size + 1);
+    idx_stack.push(self.nth_empty(&board, 0));
+
+    loop {
+      if idx_stack.len() == 0 {
+        // We've tried every combo
+        break;
+      }
+
+      let idx = idx_stack.pop().unwrap();
+
+      if idx == usize::MAX {
+        // We filled the board! Woo!
+        solutions += 1;
+        if solutions > 1 {
+          // prune this function to only generate 2 solutions
+          break;
+        }
+        continue;
+      }
+
+      if board[idx] == BoardState::SECONDARY {
+        // We've fully exhausted this state. Just pop it.
+        board[idx] = BoardState::EMPTY;
+        continue;
+      }
+
+      // Try the next state.
+      if board[idx] == BoardState::EMPTY {
+        board[idx] = BoardState::PRIMARY;
+      } else {
+        board[idx] = BoardState::SECONDARY;
+      }
+      idx_stack.push(idx);
+
+      // We can progress through the board if this new state is valid.
+      if self.validate_board(&board) {
+        idx_stack.push(self.nth_empty(&board, 0));
+      }
+    }
+
+    return solutions;
+  }
+
+  fn nth_empty(&self, board: &Vec<BoardState>, n: usize) -> usize {
+    let mut empty_count = 0;
+    for i in 0..(self.size * self.size) {
+      if board[i] == BoardState::EMPTY {
+        empty_count += 1;
+
+        if empty_count == n + 1 {
+          return i;
+        }
+      }
+    }
+
+    return usize::MAX;
+  }
 
   fn validate_board(&self, board: &Vec<BoardState>) -> bool {
     let state_max = self.size / 2;
@@ -300,5 +388,44 @@ mod tests {
     let board = to_board(&valid);
 
     assert_eq!(true, validator.validate_board(&board));
+  }
+
+  #[test]
+  fn many_solutions() {
+    let generator = BoardGenerator { size: 4 };
+    let two_solutions: Vec<i8> = vec![
+      0, 2, 1, 0, // no-fmt
+      1, 1, 2, 2, // no-fmt
+      2, 1, 2, 1, // no-fmt
+      0, 2, 1, 0, // no-fmt
+    ];
+    let board = to_board(&two_solutions);
+    assert_eq!(2, generator.count_solutions(&board));
+  }
+
+  #[test]
+  fn one_solutions() {
+    let generator = BoardGenerator { size: 4 };
+    let two_solutions: Vec<i8> = vec![
+      0, 1, 2, 0, // no-fmt
+      1, 1, 2, 2, // no-fmt
+      2, 2, 1, 1, // no-fmt
+      0, 2, 1, 0, // no-fmt
+    ];
+    let board = to_board(&two_solutions);
+    assert_eq!(1, generator.count_solutions(&board));
+  }
+
+  #[test]
+  fn no_solutions() {
+    let generator = BoardGenerator { size: 4 };
+    let two_solutions: Vec<i8> = vec![
+      0, 2, 2, 0, // no-fmt
+      0, 0, 0, 0, // no-fmt
+      0, 0, 0, 0, // no-fmt
+      0, 2, 2, 0, // no-fmt
+    ];
+    let board = to_board(&two_solutions);
+    assert_eq!(0, generator.count_solutions(&board));
   }
 }

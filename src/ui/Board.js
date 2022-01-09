@@ -84,6 +84,25 @@ export default function Board() {
     <div>
       <button style={styles.button} onClick={() => {
         setShowInvalidTiles(true);
+        setTimeout(() => {
+          const generatedBoard = Window.this.xcall('gen_takuzu_board', 8);
+          
+          console.log(generatedBoard);
+          let boardStr = '';
+          console.log('╔═╦═╦═╦═╦═╦═╦═╦═╗');
+          for (let i = 0; i < generatedBoard.length; i++) {
+            boardStr += '║' + (generatedBoard[i] ?? ' ');
+            if (i % 8 == 7) {
+              console.log(boardStr + '║');
+              boardStr = '';
+              if (i == generatedBoard.length - 1) {
+                console.log('╚═╩═╩═╩═╩═╩═╩═╩═╝');
+              } else {
+                console.log('╠═╬═╬═╬═╬═╬═╬═╬═╣');
+              }
+            }
+          }
+        }, 10);
       }}>Check Solution</button>
     </div>
     <div style={styles.board}>

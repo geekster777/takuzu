@@ -2,11 +2,13 @@
 
 extern crate color_thief;
 extern crate image;
+extern crate rand;
 extern crate sciter;
 
 mod gen_board;
 
 use color_thief::ColorFormat;
+use gen_board::{BoardGenerator, BoardState};
 use sciter::{dispatch_script_call, Value};
 
 struct Handler {
@@ -31,11 +33,27 @@ impl Handler {
       })
       .collect();
   }
+
+  fn gen_takuzu_board(&self, size: i32) -> Value {
+    let generator = BoardGenerator {
+      size: size as usize,
+    };
+    let board = generator.gen_board();
+    return board
+      .into_iter()
+      .map(|tile| match tile {
+        BoardState::EMPTY => Value::null(),
+        BoardState::PRIMARY => Value::from(0),
+        BoardState::SECONDARY => Value::from(1),
+      })
+      .collect();
+  }
 }
 
 impl sciter::EventHandler for Handler {
   dispatch_script_call! {
     fn color_palette(String);
+    fn gen_takuzu_board(i32);
   }
 }
 
