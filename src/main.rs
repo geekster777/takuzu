@@ -4,6 +4,8 @@ extern crate color_thief;
 extern crate image;
 extern crate sciter;
 
+mod gen_board;
+
 use color_thief::ColorFormat;
 use sciter::{dispatch_script_call, Value};
 
