@@ -1,4 +1,4 @@
-// #![windows_subsystem = "windows"]
+#![windows_subsystem = "windows"]
 
 extern crate color_thief;
 extern crate image;
@@ -48,12 +48,35 @@ impl Handler {
       })
       .collect();
   }
+
+  fn gen_takuzu_board_optimized(&self, size: i32) -> Value {
+    let generator = BoardGenerator {
+      size: size as usize,
+    };
+    let (board, solution) = generator.gen_board_optimized();
+
+    let serialize_board = |b: Vec<BoardState>| -> Value {
+      b.into_iter()
+        .map(|tile| match tile {
+          BoardState::EMPTY => Value::null(),
+          BoardState::PRIMARY => Value::from(0),
+          BoardState::SECONDARY => Value::from(1),
+        })
+        .collect()
+    };
+
+    let mut result = Value::map();
+    result.set_item("board", serialize_board(board));
+    result.set_item("solution", serialize_board(solution));
+    return result;
+  }
 }
 
 impl sciter::EventHandler for Handler {
   dispatch_script_call! {
     fn color_palette(String);
     fn gen_takuzu_board(i32);
+    fn gen_takuzu_board_optimized(i32);
   }
 }
 

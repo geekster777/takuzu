@@ -52,6 +52,25 @@ function rgbToHex(r, g, b) {
   return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
 }
 
+function printBoard(board) {
+  console.log(board);
+  let size = Math.sqrt(board.length);
+  let boardStr = '';
+  console.log(`╔${Array(size).fill('═').join('╦')}╗`);
+  for (let i = 0; i < board.length; i++) {
+    boardStr += '║' + (board[i] ?? ' ');
+    if (i % size == size - 1) {
+      console.log(boardStr + '║');
+      boardStr = '';
+      if (i == board.length - 1) {
+        console.log(`╚${Array(size).fill('═').join('╩')}╝`);
+      } else {
+        console.log(`╠${Array(size).fill('═').join('╬')}╣`);
+      }
+    }
+  }
+}
+
 export default function Board() {
   const [board, setBoard] = useState(BOARD);
   const [showInvalidTiles, setShowInvalidTiles] = useState(false);
@@ -85,23 +104,10 @@ export default function Board() {
       <button style={styles.button} onClick={() => {
         setShowInvalidTiles(true);
         setTimeout(() => {
-          const generatedBoard = Window.this.xcall('gen_takuzu_board', 8);
+          const {board, solution} = Window.this.xcall('gen_takuzu_board_optimized', 12);
           
-          console.log(generatedBoard);
-          let boardStr = '';
-          console.log('╔═╦═╦═╦═╦═╦═╦═╦═╗');
-          for (let i = 0; i < generatedBoard.length; i++) {
-            boardStr += '║' + (generatedBoard[i] ?? ' ');
-            if (i % 8 == 7) {
-              console.log(boardStr + '║');
-              boardStr = '';
-              if (i == generatedBoard.length - 1) {
-                console.log('╚═╩═╩═╩═╩═╩═╩═╩═╝');
-              } else {
-                console.log('╠═╬═╬═╬═╬═╬═╬═╬═╣');
-              }
-            }
-          }
+          printBoard(board);
+          printBoard(solution);
         }, 10);
       }}>Check Solution</button>
     </div>
