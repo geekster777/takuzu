@@ -316,11 +316,8 @@ impl BoardGenerator {
       empty_board.push(BoardState::EMPTY);
     }
 
-    println!("start");
     let (mut board, solution) = self.gen_seeded_board(&empty_board).unwrap();
-    println!("lame board");
     self.prune_unnecessary_tiles(&mut board);
-    println!("lightly pruned board");
 
     let mut rng = rand::thread_rng();
 
@@ -343,7 +340,6 @@ impl BoardGenerator {
         print!("Oh no! This shouldn't happen!!! :-(");
       }
 
-      println!("Inverting tile {}", tile);
       if self.gen_seeded_board(&board).is_err() {
         // each tile can only have one value in a final solution, so we can
         // prune this tile if inverting it would produce an invalid solution.
@@ -353,8 +349,6 @@ impl BoardGenerator {
         board[tile] = last_state;
       }
     }
-
-    println!("Done");
 
     return (board, solution);
     /*

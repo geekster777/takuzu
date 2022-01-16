@@ -1,4 +1,4 @@
-import {useState, useEffect, useMemo} from 'preact';
+import {useState, useEffect, useMemo, useCallback} from 'preact';
 import Tile from 'tile';
 import {isValid, TILE_STATE} from 'validation';
 import {calcVibrantColors} from 'colorUtils';
@@ -72,6 +72,7 @@ function printBoard(board) {
 }
 
 export default function Board() {
+  const [baseBoard, setBaseBoard] = useState(BOARD);
   const [board, setBoard] = useState(BOARD);
   const [showInvalidTiles, setShowInvalidTiles] = useState(false);
   const [palette, setPalette] = useState({
@@ -99,17 +100,29 @@ export default function Board() {
     return isValid(board);
   }, [board, showInvalidTiles]);
 
+  const newGame = useCallback((size) => {
+    setTimeout(() => {
+      const {board} = Window.this.xcall('gen_takuzu_board_optimized', size);
+      let newBoard = [];
+      for (let i = 0; i < size; i++) {
+        newBoard.push(board.slice(i * size, i * size + size));
+      }
+      setBoard(newBoard);
+      setBaseBoard(newBoard);
+    }, 10);
+  }, [setBoard]);
+
   return <div style={styles.content}>
     <div>
       <button style={styles.button} onClick={() => {
         setShowInvalidTiles(true);
-        setTimeout(() => {
-          const {board, solution} = Window.this.xcall('gen_takuzu_board_optimized', 12);
-          
-          printBoard(board);
-          printBoard(solution);
-        }, 10);
       }}>Check Solution</button>
+      <button style={styles.button} onClick={() => newGame(4)}>4x4</button>
+      <button style={styles.button} onClick={() => newGame(6)}>6x6</button>
+      <button style={styles.button} onClick={() => newGame(8)}>8x8</button>
+      <button style={styles.button} onClick={() => newGame(10)}>10x10</button>
+      <button style={styles.button} onClick={() => newGame(12)}>12x12</button>
+      <button style={styles.button} onClick={() => newGame(16)}>16x16</button>
     </div>
     <div style={styles.board}>
       {board.map((row, i) => {
@@ -124,7 +137,7 @@ export default function Board() {
 
             return <Tile state={tileState}
               onClick={toggleTile}
-              locked={BOARD[i][j] !== TILE_STATE.UNSELECTED}
+              locked={baseBoard[i][j] !== TILE_STATE.UNSELECTED}
               invalid={invalidTiles.indexOf(`${i},${j}`) !== -1}
               palette={palette}
               />;
