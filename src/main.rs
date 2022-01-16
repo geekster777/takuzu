@@ -38,22 +38,7 @@ impl Handler {
     let generator = BoardGenerator {
       size: size as usize,
     };
-    let board = generator.gen_board();
-    return board
-      .into_iter()
-      .map(|tile| match tile {
-        BoardState::EMPTY => Value::null(),
-        BoardState::PRIMARY => Value::from(0),
-        BoardState::SECONDARY => Value::from(1),
-      })
-      .collect();
-  }
-
-  fn gen_takuzu_board_optimized(&self, size: i32) -> Value {
-    let generator = BoardGenerator {
-      size: size as usize,
-    };
-    let (board, solution) = generator.gen_board_optimized();
+    let (board, solution) = generator.gen_board();
 
     let serialize_board = |b: Vec<BoardState>| -> Value {
       b.into_iter()
@@ -76,7 +61,6 @@ impl sciter::EventHandler for Handler {
   dispatch_script_call! {
     fn color_palette(String);
     fn gen_takuzu_board(i32);
-    fn gen_takuzu_board_optimized(i32);
   }
 }
 

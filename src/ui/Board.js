@@ -102,7 +102,7 @@ export default function Board() {
 
   const newGame = useCallback((size) => {
     setTimeout(() => {
-      const {board} = Window.this.xcall('gen_takuzu_board_optimized', size);
+      const {board} = Window.this.xcall('gen_takuzu_board', size);
       let newBoard = [];
       for (let i = 0; i < size; i++) {
         newBoard.push(board.slice(i * size, i * size + size));
